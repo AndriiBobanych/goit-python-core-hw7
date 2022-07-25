@@ -1,18 +1,18 @@
-from pathlib import Path
+from typing import Dict, List
 import re
+import os
 import shutil
+import os.path
 import sys
 
 
-# NORMALIZING PROCESS--------------------------------------------------------
-
 CYRILLIC_SYMBOLS = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяєіїґ'
 TRANSLATION = ("a", "b", "v", "g", "d", "e", "e", "j", "z", "y", "j",
-                "k", "l", "m", "n", "o", "p", "r", "s", "t", "u", "f", "h",
-                "ts", "ch", "sh", "sch", "", "y", "", "e", "yu", "ja", "je", "i", "ji", "g")
+               "k", "l", "m", "n", "o", "p", "r", "s", "t", "u", "f", "h",
+               "ts", "ch", "sh", "sch", "", "y", "", "e", "yu", "ja", "je", "i", "ji", "g")
 
 
-TRANSLITERATION_DICT = {}    # dictionary for collection of transliterations cyr: lat
+TRANSLITERATION_DICT = {}
 
 
 for cyr, lat in zip(CYRILLIC_SYMBOLS, TRANSLATION):
@@ -20,140 +20,100 @@ for cyr, lat in zip(CYRILLIC_SYMBOLS, TRANSLATION):
     TRANSLITERATION_DICT[ord(cyr.upper())] = lat.upper()
 
 
-def normalize(name: str) -> str:
+def normalize(name):
     translate_name = name.translate(TRANSLITERATION_DICT)
-    translate_name = re.sub(r'\W', '_', translate_name)     # we change unknown symbols to "_"
+    idx = translate_name.rfind(".")
+    translate_name = re.sub(r'\W', '_', translate_name[0:idx]) + translate_name[idx:]
     return translate_name
 
 
-# PARSING PROCESS--------------------------------------------------------
+ARCHIVES = "archives"
+UNKNOWN = "unknown"
 
-images_ext = ('JPEG', 'PNG', 'JPG', 'SVG')
-video_ext = ('AVI', 'MP4', 'MOV', 'MKV')
-audio_ext = ('MP3', 'OGG', 'WAV', 'AMR')
-documents_ext = ('DOC', 'DOCX', 'TXT', 'PDF', 'XLSX', 'PPTX')
-archives_ext = ('ZIP', 'GZ', 'TAR')
+CATEGORIES: Dict[str, List] = {
+    "images": ['jpeg', 'png', 'jpg', 'svg'],
+    "videos": ['avi', 'mp4', 'mov', 'mkv'],
+    "documents": ['doc', 'docx', 'txt', 'pdf', 'xlsx', 'pptx'],
+    "music": ['mp3', 'ogg', 'wav', 'amr'],
+    "archives": ['zip', 'gz', 'tar'],
+    "unknowns": [],
+    }
 
-folders_list = []
-images_list = []
-video_list = []
-audio_list = []
-documents_list = []
-archives_list = []
-unknown_list = []
-
+sorted_files_list = []
 extensions_set = set()
 unknown_ext_set = set()
 
 
-# we create the function to take suffix
-def get_extension(filename):
-    return Path(filename).suffix[1:].upper()
+def define_category(file_path: str):
+    global CATEGORIES
+    extension = file_path.split(".")[-1]
+
+    for category, category_extensions in CATEGORIES.items():
+        if extension in category_extensions:
+            extensions_set.add(extension)
+            return category
+
+    CATEGORIES[UNKNOWN].append(extension)
+    unknown_ext_set.add(extension)
+    return UNKNOWN
 
 
-# we create the function for parsing the input folder
-def user_folder_scan(path: Path) -> None:
-    for element in path.iterdir():
+def unpack_archive(archive_src: str, destination_folder: str):
+    shutil.unpack_archive(archive_src, destination_folder)
 
-        # we check if the element is "folder"
-        if element.is_dir():
-            if element.name not in ('archives', 'video', 'audio', 'documents', 'images', 'other'):
-                folders_list.append(element)
-                # if "yes" - we use recursion to check the attached sub-folder
-                user_folder_scan(element)
-            else:
-                continue
 
-        # if element is "file":
-        full_path_name = path / normalize(element.name)  # we take full route (path) to file
-        file_extension = get_extension(element.name)  # we use function to take suffix to create the folder later
+def move_to_category_folder(src: str, destination: str):
+    category = define_category(src)
+    destination_folder: str = os.path.join(destination, category)  # - /target/images
 
-        if file_extension in images_ext:
-            images_list.append(full_path_name)
-            extensions_set.add(file_extension)
+    if not os.path.exists(destination_folder):
+        os.mkdir(destination_folder)
 
-        elif file_extension in video_ext:
-            video_list.append(full_path_name)
-            extensions_set.add(file_extension)
+    if category == ARCHIVES:
+        unpack_archive(src, destination_folder)
+        return
 
-        elif file_extension in audio_ext:
-            audio_list.append(full_path_name)
-            extensions_set.add(file_extension)
+    filename: str = os.path.split(src)[-1]
+    new_filename = normalize(filename)
+    destination_filepath = os.path.join(destination_folder, new_filename)
+    sorted_files_list.append(destination_filepath)
+    shutil.move(src, destination_filepath)
 
-        elif file_extension in documents_ext:
-            documents_list.append(full_path_name)
-            extensions_set.add(file_extension)
 
-        elif file_extension in archives_ext:
-            archives_list.append(full_path_name)
-            extensions_set.add(file_extension)
+def arrange_files_sorting_in_folder(target_path: str, destination_folder: str = None):
+    if destination_folder is None:
+        destination_folder = target_path
+
+    inner_files = os.listdir(target_path)
+    for filename in inner_files:
+        file_path: str = os.path.join(target_path, filename)
+
+        if os.path.isdir(file_path):
+            arrange_files_sorting_in_folder(file_path)
+
+        elif os.path.isfile(file_path):
+            move_to_category_folder(file_path, destination_folder)
 
         else:
-            unknown_list.append(full_path_name)
-            unknown_ext_set.add(file_extension)
+            raise OSError
 
 
-# HANDLING PROCESS --------------------------------------------------------
-
-def handle_file(filename: Path, target_folder: Path):
-    target_folder.mkdir(exist_ok=True, parents=True)
-    filename.replace(target_folder)
-
-
-def handle_archive(filename: Path, target_folder: Path):
-    # We create folder for archive
-    target_folder.mkdir(exist_ok=True, parents=True)
-    # We create folder for unpacking (named as archive without extension)
-    folder_for_file = target_folder / normalize(filename.name.replace(filename.suffix, ''))
-    folder_for_file.mkdir(exist_ok=True, parents=True)
+def main():
     try:
-        shutil.unpack_archive(str(filename.resolve()),
-                              str(folder_for_file.resolve()))
-    except shutil.ReadError:
-        print(f'It is not archive {filename}!')
-        folder_for_file.rmdir()
-        return None
-    filename.unlink()
+        target_folder = sys.argv[1]
+    except IndexError:
+        print("Folder for sorting was not defined. Please enter path to folder.")
+        return
+
+    if not os.path.exists(target_folder):
+        print("Indicated folder doesn't exist. Please check path and start process again")
+        exit()
+
+    print(f'\nWe start file sorting process in folder -> {target_folder}\n')
+    arrange_files_sorting_in_folder(target_folder)
+    print(f'Sorting process in progress...\n')
+    print(f"Files were sorted successfully. Please check here -> {target_folder}\n")
 
 
-def handle_folder(folder: Path):
-    try:
-        folder.rmdir()
-    except OSError:
-        print(f'Error occurs while deleting folder {folder}')
-
-
-# MAIN PROCESS --------------------------------------------------------
-
-def main_script(folder: Path):
-    user_folder_scan(folder)
-
-    for file in images_list:
-        handle_file(file, folder / 'images')
-
-    for file in video_list:
-        handle_file(file, folder / 'video')
-
-    for file in audio_list:
-        handle_file(file, folder / 'audio')
-
-    for file in documents_list:
-        handle_file(file, folder / 'documents')
-
-    for file in archives_list:
-        handle_archive(file, folder / 'archives')
-
-    for file in unknown_list:
-        handle_file(file, folder / 'other')
-
-    for folder in folders_list:
-        handle_folder(folder)
-
-
-# if main unit --------------------------------------------------------
-
-if __name__ == '__main__':
-    if sys.argv[1]:
-        folder_for_scan = Path(sys.argv[1])
-        print(f'We start in folder {folder_for_scan.resolve()}')
-        main_script(folder_for_scan.resolve())
+if __name__ == "__main__":
+    main()

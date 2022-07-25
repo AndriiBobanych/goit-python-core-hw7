@@ -1,1 +1,2 @@
-from clean import main_script
+from clean import main
+
