@@ -21,4 +21,3 @@ setup(
     # after ":" - the function that shall be performed -> main_script
 
 )
-

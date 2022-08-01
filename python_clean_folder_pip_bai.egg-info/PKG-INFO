@@ -1,0 +1,10 @@
+Metadata-Version: 2.1
+Name: python-clean-folder-pip-bai
+Version: 1.0.0
+Summary: Package with scripts for folders handling and sorting
+Home-page: https://github.com/AndriiBobanych/python_clean_folder_pip_bai
+Author-email: andrii.bobanych@gmail.com
+License: LICENSE
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
