@@ -1,9 +1,0 @@
-MANIFEST.in
-setup.py
-python_clean_folder_pip_bai/__init__.py
-python_clean_folder_pip_bai/clean.py
-python_clean_folder_pip_bai.egg-info/PKG-INFO
-python_clean_folder_pip_bai.egg-info/SOURCES.txt
-python_clean_folder_pip_bai.egg-info/dependency_links.txt
-python_clean_folder_pip_bai.egg-info/entry_points.txt
-python_clean_folder_pip_bai.egg-info/top_level.txt

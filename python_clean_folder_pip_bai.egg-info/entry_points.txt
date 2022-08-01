@@ -1,3 +1,0 @@
-[console_scripts]
-clean-folder = python_clean_folder_pip_bai.clean:main_script
-
