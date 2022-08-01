@@ -98,7 +98,7 @@ def arrange_files_sorting_in_folder(target_path: str, destination_folder: str = 
             raise OSError
 
 
-def main():
+def main_script():
     try:
         target_folder = sys.argv[1]
     except IndexError:
@@ -116,4 +116,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main_script()

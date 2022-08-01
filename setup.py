@@ -5,19 +5,20 @@ setup(
     version='1.0.0',
     description='Package with scripts for folders handling and sorting',
     url='https://github.com/AndriiBobanych/goit-python-core-hw7',
-    author='Andrii Bobanych',
+    author1='Andrii Bobanych',
     author_email='andrii.bobanych@gmail.com',
-    license='Open source',
+    readme="README.md",
+    license="LICENSE",
     classifiers=[
           "Programming Language :: Python :: 3",
           "License :: OSI Approved :: License free",
           "Operating System :: OS Independent",
     ],
     packages=find_namespace_packages(),
-    entry_points={'console_scripts': ['greeting=hello_world_bai_trial.main:greeting']}
-    # greeting - команда яка повинна виконатись у терміналі
-    # після "=" пишемо шлях до файлу де знаходиться функція -> hello_world_bai_trial.main
-    # пімля ":" пишемо функцію яка повинна иконатись -> greeting
+    entry_points={'console_scripts': ['clean-folder=clean_folder_bai.clean:main_script']}
+    # greeting - command that shall be executed in the terminal
+    # after "=" - the path to the file where the function is located -> clean_folder_bai.clean
+    # after ":" - the function that shall be performed -> main_script
 
 )
 
