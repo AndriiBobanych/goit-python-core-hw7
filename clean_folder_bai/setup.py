@@ -1,15 +1,16 @@
 from setuptools import setup, find_namespace_packages
 
 setup(
-    name='hello_world_bai_trial',
-    version='0.1.0',
-    description='package with script for folders handling',
+    name='clean_folder_bai',
+    version='1.0.0',
+    description='Package with scripts for folders handling and sorting',
+    url='https://github.com/AndriiBobanych/goit-python-core-hw7',
     author='Andrii Bobanych',
     author_email='andrii.bobanych@gmail.com',
-    license='MIT',
+    license='Open source',
     classifiers=[
           "Programming Language :: Python :: 3",
-          "License :: OSI Approved :: MIT License",
+          "License :: OSI Approved :: License free",
           "Operating System :: OS Independent",
     ],
     packages=find_namespace_packages(),

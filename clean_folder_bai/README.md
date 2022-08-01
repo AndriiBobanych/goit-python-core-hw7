@@ -13,7 +13,7 @@ Contain functions:
 
 
 Main package with modules is located here  
-https://github.com/AndriiBobanych/goit-python-core-hw6
+https://github.com/AndriiBobanych/goit-python-core-hw7
 
 
 Author: <b>Andrii Bobanych<b>
