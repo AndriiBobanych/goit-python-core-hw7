@@ -19,5 +19,5 @@ setup(
     # greeting - command that shall be executed in the terminal
     # after "=" - the path to the file where the function is located -> python_clean_folder_pip_bai.clean
     # after ":" - the function that shall be performed -> main_script
-
 )
+
