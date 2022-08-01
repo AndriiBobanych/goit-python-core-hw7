@@ -1,0 +1,14 @@
+Metadata-Version: 2.1
+Name: python-clean-folder-pip-bai
+Version: 1.0.0
+Summary: Package with scripts for folders handling and sorting
+Home-page: https://github.com/AndriiBobanych/goit-python-core-hw7
+Author-email: andrii.bobanych@gmail.com
+License: LICENSE
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: License free
+Classifier: Operating System :: OS Independent
+
+UNKNOWN
+
